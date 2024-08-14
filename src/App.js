@@ -1,10 +1,24 @@
-import './App.css';
+import React from "react";
+import Navbar from './components/navbar';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from "./components/login";
+import Register from "./components/register";
 
 function App() {
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
+    <Router>
+      <div className="h-screen bg-[#f0f5fe] border-8 border-black ">
+      <Navbar/>
+      <div>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          {/* <Route path="/dashboard" element = {<DashBoard/>}/> */}
+
+        </Routes>
+      </div>
+      </div>
+    </Router>
   );
 }
 
