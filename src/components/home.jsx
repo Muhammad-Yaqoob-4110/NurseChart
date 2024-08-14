@@ -6,11 +6,23 @@ class Home extends Component {
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
                     <div className='h-[400px] w-[632px] p-4 bg-white rounded-[7px]'>
-                        <h4 className=" border-2 p-4 text-center font-['Epilogue'] font-bold text-lg text-white bg-[#00817FFF]"> NurseChart</h4>
+                    
 
-                        <div className='flex gap-1 grid-cols-2 mt-3'>
+                        <div className=" flex bg-[#00817FFF] p-4">
+                            <div className='w-4/5 '>
+                                <h4 className="text-center font-bold text-lg text-white">NurseChart</h4>
+                            </div>
+                            <div className='w-1/5  flex justify-end'>
+                            <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
+                                        Logout
+                            </button>
+                            </div>
+                        </div>
+
+
+                        <div className='flex gap-1 grid-cols-2 mt-1'>
                             {/* Left Section */}
-                            <div className='w-1/4 border-2'>
+                            <div className='w-1/4 '>
                                 <ul className='flex flex-col gap-0'>
                                     <p>Patient List</p>
 
@@ -24,13 +36,17 @@ class Home extends Component {
                                 </button>
                             </div>
                             {/* Right Section */}
-                            <div className='flex flex-col gap-2 w-3/4 border-2'>
+                            <div className='flex flex-col gap-2 w-3/4 '>
                                 <p>Quick Templates</p>
-                                <div className='flex gap-2 '>
-                                    <select className='border'>
+                                <div className='flex gap-2'>
+                                    <select className='border focus:outline-none'>
                                         <option value="saab">Select a Template</option>
-                                        <option value="mercedes">Mercedes</option>
-                                        <option value="audi">Audi</option>
+                                        <option value="mercedes">Vital Signs</option>
+                                        <option value="audi">Head-to-Toe Assessment</option>
+                                        <option value="audi">Medication Administration</option>
+                                        <option value="audi">Specialized Care</option>
+                                        <option value="audi">Patient Education</option>
+                                        <option value="audi">Plain for Next Visit</option>
                                     </select>
                                     <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
                                         Generate Report
@@ -46,8 +62,7 @@ class Home extends Component {
                                         Stop Recording
                                     </button>
                                 </div>
-                                <textarea className='border resize-none' id="w3review" name="w3review" rows="6" cols="50">
-                                    At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+                                <textarea className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder ='Transcription will appear here.' id="w3review" name="w3review" rows="6" cols="50">
                                 </textarea>
                             </div>
                         </div>

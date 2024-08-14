@@ -6,7 +6,7 @@ class Register extends Component {
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
                     <div className='h-[400px] w-[632px] p-6 bg-white rounded-[7px]'>
-                        <h4 className="p-4 text-center font-['Epilogue'] font-bold text-lg text-[#00817FFF]"> NurseChart</h4>
+                        <h4 className="p-4 text-center font-bold text-lg text-[#00817FFF]"> NurseChart</h4>
                         <div className='flex flex-col gap-2'>
                             <label className="relative block">
                                 <span className="sr-only">Full Name</span>
