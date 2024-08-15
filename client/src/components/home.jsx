@@ -2,7 +2,24 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
 class Home extends Component {
+    constructor(props) {
+        super(props);
+        // Initial state
+        this.state = {
+          isRecording: false,
+        };
+      }
+
+    // Function to start Recording
+    handleRecording = () => {
+        this.setState({isRecording:true})
+    };
+    handleStopRecording = () => {
+        this.setState({isRecording:false})
+    }
+
     render() {
+        const { isRecording } = this.state;
         return (
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
@@ -54,11 +71,11 @@ class Home extends Component {
                                 <p>Voice Recording</p>
 
                                 <div className='flex gap-2 '>
-                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
-                                        Start Recording
+                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={this.handleRecording}>
+                                    {isRecording ? 'Recording...' : 'Start Recording'}
                                     </button>
-                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
-                                        Stop Recording
+                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={this.handleStopRecording}>
+                                    Stop Recording
                                     </button>
                                 </div>
                                 <textarea className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder ='Transcription will appear here.' id="w3review" name="w3review" rows="6" cols="50">
