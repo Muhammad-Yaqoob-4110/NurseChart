@@ -7,7 +7,7 @@ class Login extends Component {
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
                     <div className='lg:w-[632px] w-11/12 p-6 bg-white rounded-[7px]'>
-                        <h4 className="p-4 text-center font-bold text-lg text-[#00817FFF]"> NurseChart</h4>
+                        <h4 className="p-4 text-center font-bold text-xl text-[#00817FFF]"> NurseChart</h4>
                         <div className='flex flex-col gap-2'>
                             <label className="relative block">
                                 <span className="sr-only">Username</span>
