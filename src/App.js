@@ -36,7 +36,7 @@ function NurseChart() {
       navbarText = 'Logged Out';
       break;
     default:
-      navbarText = 'Default Text';
+      navbarText = 'NurseChart';
   }
 
   return (

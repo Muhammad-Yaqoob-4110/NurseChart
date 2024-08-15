@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 class Login extends Component {
     render() {
@@ -34,7 +35,7 @@ class Login extends Component {
                         <div className='flex gap-1 justify-center'>
                             <a className='text-blue-600 hover:underline' href="">Forget Password</a>
                             <p className='text-blue-600'>|</p>
-                            <a className='text-blue-600 hover:underline' href="">Register New Account</a>
+                            <Link className='text-blue-600 hover:underline' to="/register">Register New Account</Link>
                             <p className='text-blue-600'>|</p>
                             <a className='text-blue-600 hover:underline' href="">Support</a>
                         </div>

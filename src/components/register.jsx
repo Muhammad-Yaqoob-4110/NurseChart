@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 class Register extends Component {
     render() {
@@ -43,8 +44,11 @@ class Register extends Component {
                                 Register
                             </button>
                         </div>
-
-                        <div className='flex flex-col mt-4 gap-3'>
+                        <div className='flex gap-1 justify-center mt-2'>
+                            <Link className='text-blue-600 hover:underline' to="/login">Already have an Account?</Link>
+                            
+                        </div>
+                        <div className='flex flex-col mt-1 gap-3'>
                         
                         <p className='text-center'>Effortless Documentation for Compassionate Care</p>
                         </div>
