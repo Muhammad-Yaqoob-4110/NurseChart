@@ -1,28 +1,27 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 class Home extends Component {
     render() {
         return (
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
-                    <div className='h-[400px] w-[632px] p-4 bg-white rounded-[7px]'>
-                    
-
+                <div className='lg:w-[632px] w-11/12 p-6 bg-white rounded-[7px]'>
                         <div className=" flex bg-[#00817FFF] p-4">
                             <div className='w-4/5 '>
                                 <h4 className="text-center font-bold text-lg text-white">NurseChart</h4>
                             </div>
                             <div className='w-1/5  flex justify-end'>
-                            <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
+                            <Link class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" to="/loggedout">
                                         Logout
-                            </button>
+                            </Link>
                             </div>
                         </div>
 
 
-                        <div className='flex gap-1 grid-cols-2 mt-1'>
+                        <div className='flex lg:flex-row flex-col gap-1 grid-cols-2 mt-1'>
                             {/* Left Section */}
-                            <div className='w-1/4 '>
+                            <div className='lg:w-1/4 '>
                                 <ul className='flex flex-col gap-0'>
                                     <p>Patient List</p>
 
@@ -36,9 +35,9 @@ class Home extends Component {
                                 </button>
                             </div>
                             {/* Right Section */}
-                            <div className='flex flex-col gap-2 w-3/4 '>
+                            <div className='flex flex-col gap-2 lg:w-3/4 '>
                                 <p>Quick Templates</p>
-                                <div className='flex gap-2'>
+                                <div className='flex gap-2 lg:text-base text-sm'>
                                     <select className='border focus:outline-none'>
                                         <option value="saab">Select a Template</option>
                                         <option value="mercedes">Vital Signs</option>
