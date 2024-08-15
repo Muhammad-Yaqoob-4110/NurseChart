@@ -4,22 +4,74 @@ import { Link } from 'react-router-dom';
 class Home extends Component {
     constructor(props) {
         super(props);
-        // Initial state
         this.state = {
           isRecording: false,
+          transcription: '',
         };
+        this.recognition = null;
+        this.textAreaRef = React.createRef();
       }
 
-    // Function to start Recording
-    handleRecording = () => {
-        this.setState({isRecording:true})
-    };
+      componentDidMount() {
+        // Check for browser support of the Web Speech API
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+          this.recognition = new SpeechRecognition();
+          this.recognition.continuous = true;
+          this.recognition.interimResults = true;
+    
+          // When speech is recognized
+          this.recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+    
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const transcript = event.results[i][0].transcript;
+              if (event.results[i].isFinal) {
+                finalTranscript += transcript;
+              } else {
+                interimTranscript += transcript;
+              }
+            }
+    
+            // Append the new transcription to the existing transcription
+            this.setState((prevState) => ({
+                transcription: prevState.transcription + finalTranscript + interimTranscript + " ",
+              }), () => {
+                // Scroll the text area to the bottom after transcription update
+                if (this.textAreaRef.current) {
+                  this.textAreaRef.current.scrollTop = this.textAreaRef.current.scrollHeight;
+                }
+              });
+          };
+    
+          this.recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+          };
+        }
+      }
+
+    // Function to stop Recording
     handleStopRecording = () => {
-        this.setState({isRecording:false})
+        if(this.state.isRecording){
+            this.recognition.stop();
+            this.setState({isRecording:false})
+        }
     }
+    
+    // Function to Start Recording
+    handleRecording = () => {
+        if(!this.state.isRecording){
+
+            this.recognition.start();
+            this.setState({ isRecording: true });
+        }
+    };
+    
 
     render() {
-        const { isRecording } = this.state;
+        const { isRecording, transcription } = this.state;
         return (
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
@@ -47,7 +99,7 @@ class Home extends Component {
                                     <a className='text-blue-600 hover:cursor-pointer hover:underline'>Ali Ahmed</a>
                                     <a className='text-blue-600 hover:cursor-pointer hover:underline'>See More...</a>
                                 </ul>
-                                <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
+                                <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
                                     Add New Patient
                                 </button>
                             </div>
@@ -64,7 +116,7 @@ class Home extends Component {
                                         <option value="audi">Patient Education</option>
                                         <option value="audi">Plain for Next Visit</option>
                                     </select>
-                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
+                                    <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
                                         Generate Report
                                     </button>
                                 </div>
@@ -78,7 +130,7 @@ class Home extends Component {
                                     Stop Recording
                                     </button>
                                 </div>
-                                <textarea className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder ='Transcription will appear here.' id="w3review" name="w3review" rows="6" cols="50">
+                                <textarea ref={this.textAreaRef} className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder ='Transcription will appear here.' id="transcription" name="transcription" value={transcription} readOnly rows="6" cols="50">
                                 </textarea>
                             </div>
                         </div>
@@ -89,7 +141,7 @@ class Home extends Component {
                     <button class="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
                         Previous
                     </button>
-                    <button class="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
+                    <button className="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
                         Next
                     </button>
                 </div>
