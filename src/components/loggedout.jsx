@@ -1,8 +1,26 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 class Loggedout extends Component {
+    componentDidMount() {
+        // Replace the current entry in the history stack with the logged-out page
+        window.history.pushState(null, '', '/loggedout');
+
+        // Listen for the popstate event to detect when the user clicks the back button
+        window.addEventListener('popstate', this.handleBackButton);
+    }
+
+    componentWillUnmount() {
+        // Clean up the event listener when the component unmounts
+        window.removeEventListener('popstate', this.handleBackButton);
+    }
+
+    handleBackButton = () => {
+        // Redirect to the login page when the user presses the back button
+        window.location.replace('/login');
+    }
     render() {
+
         return (
             <div className='w-full h-full mt-8'>
                 <div className='flex justify-center items-center'>
