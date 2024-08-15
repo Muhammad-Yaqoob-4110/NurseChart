@@ -6,8 +6,8 @@ class Register extends Component {
         return (
             <div className='w-full h-full'>
                 <div className='flex justify-center items-center mt-8'>
-                    <div className='h-[400px] w-[632px] p-6 bg-white rounded-[7px]'>
-                        <h4 className="p-4 text-center font-bold text-lg text-[#00817FFF]"> NurseChart</h4>
+                <div className='lg:w-[632px] w-11/12 p-6 bg-white rounded-[7px]'>
+                        <h4 className="p-4 text-center font-bold text-xl text-[#00817FFF]"> NurseChart</h4>
                         <div className='flex flex-col gap-2'>
                             <label className="relative block">
                                 <span className="sr-only">Full Name</span>
@@ -40,15 +40,15 @@ class Register extends Component {
                         </div>
 
                         <div className='flex mt-2 justify-center'>
-                            <button class="bg-[#00817FFF] cursor-pointer py-2 px-5 text-white rounded">
+                            <Link class="bg-[#00817FFF] cursor-pointer py-2 px-5 text-white rounded" to="/home">
                                 Register
-                            </button>
+                            </Link>
                         </div>
                         <div className='flex gap-1 justify-center mt-2'>
-                            <Link className='text-blue-600 hover:underline' to="/login">Already have an Account?</Link>
+                            <Link className='text-blue-600 hover:underline lg:text-base text-sm' to="/login">Already have an Account?</Link>
                             
                         </div>
-                        <div className='flex flex-col mt-1 gap-3'>
+                        <div className='flex flex-col mt-1 gap-3 lg:text-base text-sm'>
                         
                         <p className='text-center'>Effortless Documentation for Compassionate Care</p>
                         </div>
