@@ -88,25 +88,25 @@ async function getAllUserNamesAndEmails(req, res) {
 //   }
 // }
 
-// // Login User
-// async function loginUser(req, res) {
-//   const { username, password } = req.body;
-//   try {
-//     const user = await User.findOne({ username });
-//     if (!user) return res.status(404).json({ error: "User not found" });
-//     if (user.password != password)
-//       return res.status(401).json({ error: "Invalid credentails " });
-//     return res.status(200).json({
-//       message: "Logged in successfully",
-//       username: username,
-//       fullname: user.firstname,
-//       userid: user._id,
-//       token: GenerateToken(user),
-//     });
-//   } catch (err) {
-//     return res.status(500).json({ message: err });
-//   }
-// }
+// Login User
+async function loginUser(req, res) {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.password != password)
+      return res.status(401).json({ error: "Invalid credentails " });
+    return res.status(200).json({
+      message: "Logged in successfully",
+      username: username,
+      fullname: user.firstname,
+      userid: user._id,
+      token: GenerateToken(user),
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err });
+  }
+}
 
 function GenerateToken(user) {
   const payload = {
@@ -128,6 +128,6 @@ module.exports = {
   getAllUserNamesAndEmails,
   // updateUser,
   // deleteUser,
-  // loginUser,
+  loginUser,
   multipleMiddleWares,
 };

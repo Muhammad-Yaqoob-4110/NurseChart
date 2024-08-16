@@ -7,11 +7,16 @@ const requireRoles = require("../utils/auth/roles_middleware");
 // create a product
 router.post("/users", userController.createUser);
 
+// get all users
+router.get("/usernamesandemails", userController.getAllUserNamesAndEmails);
+
+// Login User
+router.post("/users/login", userController.loginUser);
+
 // // create a product
 // router.post("/users", userController.createUser);
 
-// get all users
-router.get("/usernamesandemails", userController.getAllUserNamesAndEmails);
+
 
 // // get all users
 // router.get("/users", validateToken, userController.getAllUsers);
@@ -22,8 +27,6 @@ router.get("/usernamesandemails", userController.getAllUserNamesAndEmails);
 // // delete a user by id
 // router.delete("/users/:id", userController.deleteUser);
 
-// // Login User
-// router.post("/users/login", userController.loginUser);
 
 
 // router.get(
