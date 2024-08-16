@@ -15,7 +15,7 @@ async function createUser(req, res) {
 }
 
 // Get all Users
-async function getAllUserNames(req, res) {
+async function getAllUserNamesAndEmails(req, res) {
   try {
     const users = await User.find();
     // Extract usernames from users array
@@ -125,7 +125,7 @@ async function multipleMiddleWares(req, res) {
 
 module.exports = {
   createUser,
-  getAllUserNames,
+  getAllUserNamesAndEmails,
   // updateUser,
   // deleteUser,
   // loginUser,

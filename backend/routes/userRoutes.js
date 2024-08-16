@@ -11,7 +11,7 @@ router.post("/users", userController.createUser);
 // router.post("/users", userController.createUser);
 
 // get all users
-router.get("/usernames", userController.getAllUserNames);
+router.get("/usernamesandemails", userController.getAllUserNamesAndEmails);
 
 // // get all users
 // router.get("/users", validateToken, userController.getAllUsers);
