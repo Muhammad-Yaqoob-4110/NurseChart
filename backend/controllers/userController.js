@@ -7,7 +7,9 @@ async function createUser(req, res) {
     const newUser = await User.create(req.body);
     res.status(201).json({
       message: "User created successfully",
-      user: newUser,
+      userername: newUser.username,
+      userid: newUser._id,
+      token: GenerateToken(newUser)
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -99,7 +101,7 @@ async function loginUser(req, res) {
     return res.status(200).json({
       message: "Logged in successfully",
       username: username,
-      fullname: user.firstname,
+      fullname: user.fullname,
       userid: user._id,
       token: GenerateToken(user),
     });
