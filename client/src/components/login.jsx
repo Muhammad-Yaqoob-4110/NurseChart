@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Joi from 'joi-browser'
 import { Link, Navigate } from 'react-router-dom';
+import axios from 'axios';
 
 class Login extends Component {
     state = {
@@ -44,19 +45,75 @@ class Login extends Component {
             this.setState({ errors });
         } else {
             this.setState({ errors: {} });
-            console.log(this.props);
+            // console.log(this.props);
             // Navigate to home
             // this.setState({ redirectToHome: true });
-
+            
             this.setState({ isLoading: true });
 
-            // Simulate an API call with a delay
-            setTimeout(() => {
-                // Here you would typically make your API call.
-                // After the call is done, stop loading
+            axios.post('http://localhost:3850/api/users/login', {
+                username: this.state.user.username,
+                password: this.state.user.password
+            })
+            .then(response => {
                 this.setState({ isLoading: false });
-                alert('Signed in successfully!'); // Simulate successful sign-in response
-            }, 2000); // Simulated delay of 2 seconds
+                if (response.status === 200) {
+                    // console.log('Login successful:', response.data); 
+                    // Navigate to home
+                    this.setState({ redirectToHome: true });
+                    // You can show a success message here
+                }
+            })
+            .catch(error => {
+                this.setState({ isLoading: false });
+            
+                if (error.response) {
+                    // Error response from server (e.g., 404, 401, 500)
+                    if (error.response.status === 404) {
+                        // console.error('Error: User not found');
+                        // alert('User not found');
+                        const errors = {
+                            username: "This user is not Registered",
+                            password: ""
+                        }
+                        this.setState({errors});
+                    } else if (error.response.status === 401) {
+                        // console.error('Error: Invalid credentials');
+                        // alert('Invalid credentials');
+                        const errors = {
+                            username: "",
+                            password: "Invalid password."
+                        }
+                        this.setState({errors});
+                    } else if (error.response.status === 500) {
+                        console.error('Server error:', error.response.data.message);
+                        alert('Internal server error');
+                    } else {
+                        console.error('Unhandled error:', error.response.data.message);
+                        alert('An unexpected error occurred');
+                    }
+                } else if (error.request) {
+                    // No response received from server
+                    console.error('No response from server');
+                    alert('No response from server');
+                } else {
+                    // Request setup or other client-side error
+                    console.error('Error setting up request:', error.message);
+                    alert('Error in request setup');
+                }
+            });
+            
+            
+
+            
+            
+            // // Simulate an API call with a delay
+            // setTimeout(() => {
+            //     // Here you would typically make your API call.
+            //     // After the call is done, stop loading
+            //     this.setState({ isLoading: false });
+            //     alert('Signed in successfully!'); // Simulate successful sign-in response
+            // }, 2000); // Simulated delay of 2 seconds
         }
     };
 
