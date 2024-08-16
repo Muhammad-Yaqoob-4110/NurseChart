@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Joi from "joi-browser";
+import Joi, { resolve } from "joi-browser";
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -90,12 +90,38 @@ class Register extends Component {
             }
             else{
                 this.setState({ isLoading: true });
-                setTimeout(() => {
-                    // Here you would typically make your API call.
-                    // After the call is done, stop loading
+                
+                axios.post('http://localhost:3850/api/users', {
+                    username: this.state.newUser.username,
+                    password: this.state.newUser.password,
+                    fullname: this.state.newUser.fullname,
+                    email: this.state.newUser.email,
+                    role: "nurse"
+                }).then(response => {
                     this.setState({ isLoading: false });
-                    alert('Signed in successfully!'); // Simulate successful sign-in response
-                }, 2000); // Simulated delay of 2 seconds
+                    // console.log(response.data);
+                    this.setState({ redirectToHome: true });
+                }).catch(error => {
+                    this.setState({ isLoading: false });
+                    if (error.response) {
+                        if (error.response.status === 500) {
+                            console.error('Server error:', error.response.data.message);
+                            alert('Internal server error');
+                        } else {
+                            console.error('Unhandled error:', error.response.data.message);
+                            alert('An unexpected error occurred');
+                        }
+                    } else if (error.request) {
+                        // No response received from server
+                        console.error('No response from server');
+                        alert('No response from server');
+                    } else {
+                        // Request setup or other client-side error
+                        console.error('Error setting up request:', error.message);
+                        alert('Error in request setup');
+                    }
+                });
+
             }
 
             
