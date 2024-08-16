@@ -14,6 +14,25 @@ async function createUser(req, res) {
   }
 }
 
+// Get all Users
+async function getAllUserNames(req, res) {
+  try {
+    const users = await User.find();
+    // Extract usernames from users array
+    const usernames = users.map(user => user.username);
+    const useremails = users.map(user => user.email);
+    dict = {
+      usernames: usernames,
+      useremails: useremails
+    }
+    // Return the list of usernames as JSON
+    res.json(dict);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+
 // // Create a User
 // async function createUser(req, res) {
 //   try {
@@ -106,7 +125,7 @@ async function multipleMiddleWares(req, res) {
 
 module.exports = {
   createUser,
-  // getAllUsers,
+  getAllUserNames,
   // updateUser,
   // deleteUser,
   // loginUser,

@@ -10,6 +10,9 @@ router.post("/users", userController.createUser);
 // // create a product
 // router.post("/users", userController.createUser);
 
+// get all users
+router.get("/usernames", userController.getAllUserNames);
+
 // // get all users
 // router.get("/users", validateToken, userController.getAllUsers);
 
