@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Joi from "joi-browser";
 import { Link, Navigate } from 'react-router-dom';
+import axios from 'axios';
 
 class Register extends Component {
     state = {
@@ -17,8 +18,21 @@ class Register extends Component {
             password: ""
         },
         redirectToHome: false,
+        usernames:[],
+        useremails:[]
     };
 
+    async componentDidMount() {
+        try {
+            const response = await axios.get('http://localhost:3850/api/usernamesandemails'); // Replace with your API endpoint
+            const usernames = response.data['usernames']
+            const useremails = response.data['useremails']
+            this.setState({ usernames, useremails });
+
+          } catch (error) {
+            console.error('Error fetching usernames:', error);
+          }
+    }
     schema = {
         fullname: Joi.string().required().label("Name"),
         email: Joi.string().email({ tlds: { allow: false } }).required().label("Email"),
@@ -50,9 +64,32 @@ class Register extends Component {
             this.setState({ errors });
         } else {
             this.setState({ errors: {} });
-            console.log(this.props);
+            // console.log(this.props);
+            // console.log(this.state.usernames);
+            // console.log(this.state.useremails);
+           
+
+            if(this.state.useremails.includes(this.state.newUser.email)){
+                const errors = {
+                    fullname: "",
+                    email: "The email is already registered",
+                    username: "",
+                    password: ""
+                }
+                this.setState({errors});
+            }
+            if(this.state.usernames.includes(this.state.newUser.username)){
+                const errors = {
+                    fullname: "",
+                    email: "",
+                    username: "The username is already taken",
+                    password: ""
+                }
+                this.setState({errors});
+            }
+            
             // Navigate to home
-            this.setState({ redirectToHome: true });
+            // this.setState({ redirectToHome: true });
         }
     };
 
