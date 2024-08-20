@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { GoogleGenerativeAI  } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import config from './config';
 import { jsPDF } from 'jspdf';
 
@@ -81,12 +81,19 @@ class Home extends Component {
     this.setState({ selectedTemplate: event.target.value });
   }
 
+  
   // Handle button click event
   handleGenerateReport = () => {
-    
+    // Function to clean up the string
+    const cleanUpResponse = (response) => {
+      return response
+        .replace(/-\s/g, '') // Remove dashes and following spaces
+        .replace(/\*\*/g, '') // Remove asterisks
+        .trim(); // Remove any leading/trailing whitespace
+    };
     const { selectedTemplate, transcription } = this.state;
     const genAI = new GoogleGenerativeAI(config.apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     // Generate the response
     // Check if the selected option is "Vital Signs"
@@ -118,18 +125,95 @@ class Home extends Component {
         console.log(text);
 
         // Create a PDF and save the generated text in it
-        const doc = new jsPDF();
-        doc.text(text, 10, 10);
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        const margin = 15;
+        // Set the font size to 11 and add the heading
+        doc.setFontSize(22);
+        doc.text("Vital Signs", margin, 25);
+
+        doc.setFontSize(11);
+        doc.setTextColor(50);
+  
+        // Define how to split the text into lines that fit within the margins
+        const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
+        // Add the content with line wrapping
+        doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+
         doc.save("VitalSignsReport.pdf");
+
+        // const doc = new jsPDF();
+        // doc.text(text, 10, 10);
+        // doc.save("VitalSignsReport.pdf");
       }
       run();
     }
+    if (selectedTemplate === "Head-to-Toe Assessment") {
+      const headToToeText = `
+      General Appearance: The patient appears well-groomed, with normal posture. No signs of distress observed.
+      Skin: The skin is warm, dry, and intact with no visible lesions.
+      Head and Neck: No abnormalities detected in the head, eyes, ears, nose, throat, or neck.
+      Chest and Lungs: Breath sounds are clear bilaterally with no signs of respiratory distress.
+      Heart: Normal heart sounds with a regular rhythm; no murmurs detected.
+      Abdomen: The abdomen is soft, non-tender, with normal bowel sounds.
+      Extremities: No edema noted; pulses are strong and equal bilaterally.
+      Genitourinary (GU) System: No signs of urinary retention or incontinence. Foley catheter is in place without signs of infection.
+      Gastrointestinal (GI) System: The patient denies nausea or vomiting, with normal bowel movements. No abdominal discomfort noted.
+      Wounds and Dressings: No wounds present, and dressings are clean and dry without signs of infection.
+      `;
 
-    // else {
-    //   console.log('Please select "Vital Signs" to generate the report.');
-    // }
+
+
+    const headToToePrompt = `
+    Extract the following details from the text:
+    - General Appearance
+    - Skin
+    - Head and Neck
+    - Chest and Lungs
+    - Heart
+    - Abdomen
+    - Extremities
+    - Genitourinary (GU) System
+    - Gastrointestinal (GI) System
+    - Wounds and Dressings
+
+    Text: ${headToToeText}
+    `;
+
+      async function run() {
+        const result = await model.generateContent(headToToePrompt);
+        const response = await result.response;
+        const text = response.text();
+        console.log(text);
+
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        const margin = 15;
+        // Set the font size to 11 and add the heading
+        doc.setFontSize(22);
+        doc.text("Head to Toe Assessment", margin, 25);
+
+        doc.setFontSize(11);
+        doc.setTextColor(50);
+  
+        // Define how to split the text into lines that fit within the margins
+        const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
+        // Add the content with line wrapping
+        doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+
+        doc.save("HeadToToeAssessmentReport.pdf");
+      }
+      run();
+    }
   }
-
 
   render() {
     const { isRecording, transcription } = this.state;
