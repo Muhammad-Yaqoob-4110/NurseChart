@@ -82,7 +82,7 @@ class Home extends Component {
     this.setState({ selectedTemplate: event.target.value });
   }
 
-  
+
   // Handle button click event
   handleGenerateReport = () => {
     // Function to clean up the string
@@ -120,42 +120,43 @@ class Home extends Component {
       `;
       const run = async () => {
         try {
-        // const prompt = "Write a story about an AI and magic"
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-        console.log(text);
+          // const prompt = "Write a story about an AI and magic"
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          const text = response.text();
+          console.log(text);
 
-        // Create a PDF and save the generated text in it
-        const doc = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4',
-        });
+          // Create a PDF and save the generated text in it
+          const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+          });
 
-        const margin = 15;
-        // Set the font size to 11 and add the heading
-        doc.setFontSize(22);
-        doc.text("Vital Signs", margin, 25);
+          const margin = 15;
+          // Set the font size to 11 and add the heading
+          doc.setFontSize(22);
+          doc.text("Vital Signs", margin, 25);
 
-        doc.setFontSize(11);
-        doc.setTextColor(50);
-  
-        // Define how to split the text into lines that fit within the margins
-        const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
-        // Add the content with line wrapping
-        doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+          doc.setFontSize(11);
+          doc.setTextColor(50);
 
-        doc.save("VitalSignsReport.pdf");
+          // Define how to split the text into lines that fit within the margins
+          const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
+          // Add the content with line wrapping
+          doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+
+          doc.save("VitalSignsReport.pdf");
+        }
+        finally {
+          this.setState({ isLoading: false });
+        }
       }
-      finally {
-        this.setState({ isLoading: false });
-      }
-    } 
       run();
 
     }
     if (selectedTemplate === "Head-to-Toe Assessment") {
+      this.setState({ isLoading: true });
       const headToToeText = `
       General Appearance: The patient appears well-groomed, with normal posture. No signs of distress observed.
       Skin: The skin is warm, dry, and intact with no visible lesions.
@@ -169,9 +170,7 @@ class Home extends Component {
       Wounds and Dressings: No wounds present, and dressings are clean and dry without signs of infection.
       `;
 
-
-
-    const headToToePrompt = `
+      const headToToePrompt = `
     Extract the following details from the text:
     - General Appearance
     - Skin
@@ -187,34 +186,39 @@ class Home extends Component {
     Text: ${headToToeText}
     `;
 
-      async function run() {
-        const result = await model.generateContent(headToToePrompt);
-        const response = await result.response;
-        const text = response.text();
-        console.log(text);
+      const run = async () => {
+        try {
+          const result = await model.generateContent(headToToePrompt);
+          const response = await result.response;
+          const text = response.text();
+          console.log(text);
 
-        const doc = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4',
-        });
+          const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+          });
 
-        const margin = 15;
-        // Set the font size to 11 and add the heading
-        doc.setFontSize(22);
-        doc.text("Head to Toe Assessment", margin, 25);
+          const margin = 15;
+          // Set the font size to 11 and add the heading
+          doc.setFontSize(22);
+          doc.text("Head to Toe Assessment", margin, 25);
 
-        doc.setFontSize(11);
-        doc.setTextColor(50);
-  
-        // Define how to split the text into lines that fit within the margins
-        const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
-        // Add the content with line wrapping
-        doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+          doc.setFontSize(11);
+          doc.setTextColor(50);
 
-        doc.save("HeadToToeAssessmentReport.pdf");
+          // Define how to split the text into lines that fit within the margins
+          const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
+          // Add the content with line wrapping
+          doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+
+          doc.save("HeadToToeAssessmentReport.pdf");
+        }
+        finally {
+          this.setState({ isLoading: false });
+        }
       }
-      run();
+        run();
     }
   }
 
@@ -223,18 +227,18 @@ class Home extends Component {
     return (
       <div className='relative'>
         {isLoading && (
-                    <div className="absolute bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
-                        <div className="flex items-center">
-                            <span className="text-3xl mr-4"></span>
-                            <svg className="animate-spin h-8 w-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
-                            </svg>
-                        </div>
-                    </div>
-                )}
+          <div className="absolute bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
+            <div className="flex items-center">
+              <span className="text-3xl mr-4"></span>
+              <svg className="animate-spin h-8 w-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+            </div>
+          </div>
+        )}
         <div className='w-full h-full'>
           <div className='flex justify-center items-center mt-8'>
             <div className='lg:w-[632px] w-11/12 p-6 bg-white rounded-[7px]'>
