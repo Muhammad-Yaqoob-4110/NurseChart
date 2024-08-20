@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { GoogleGenerativeAI  } from '@google/generative-ai';
 import config from './config';
+import { jsPDF } from 'jspdf';
 
 class Home extends Component {
   constructor(props) {
@@ -87,14 +88,15 @@ class Home extends Component {
     const genAI = new GoogleGenerativeAI(config.apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro"});
 
-    // Define the text from which you want to extract details
+    // Generate the response
+    // Check if the selected option is "Vital Signs"
+    if (selectedTemplate === "Vital Signs") {
+
+      // Define the text from which you want to extract details
       const text = `
       Patient's vital signs are as follows: Temperature is 98.6°F, Pulse is 72 bpm, Respiration rate is 16 breaths per minute, Blood pressure is 120/80 mmHg, Oxygen saturation is 98%, Pain level is 3 out of 10, and Blood sugar level is 90 mg/dL.
       `;
 
-    // Generate the response
-    // Check if the selected option is "Vital Signs"
-    if (selectedTemplate === "Vital Signs") {
       // Define the prompt for extraction
       const prompt = `
       Extract the following details from the text:
@@ -114,10 +116,15 @@ class Home extends Component {
         const response = await result.response;
         const text = response.text();
         console.log(text);
+
+        // Create a PDF and save the generated text in it
+        const doc = new jsPDF();
+        doc.text(text, 10, 10);
+        doc.save("VitalSignsReport.pdf");
       }
-      
       run();
     }
+
     // else {
     //   console.log('Please select "Vital Signs" to generate the report.');
     // }
