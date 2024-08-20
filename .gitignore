@@ -1,2 +1,7 @@
 backend/node_modules
 backend/config.json
+
+client/src/components/loading.jsx
+client/src/components/transcription.jsx
+
+client/src/components/config.js
