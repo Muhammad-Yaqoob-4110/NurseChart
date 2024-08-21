@@ -15,24 +15,8 @@ class Home extends Component {
       transcription: '',
       selectedTemplate: '',
       isLoading: false,
-      recentTemplates: [
-        "H.T 7:29:04 AM 8/21/2024",
-        "V.S 7:30:54 AM 8/21/2024",
-        "H.T 7:31:04 AM 8/21/2024",
-        "V.S 7:32:54 AM 8/21/2024",
-        "H.T 7:33:04 AM 8/21/2024",
-        "V.S 7:34:54 AM 8/21/2024",
-        "H.T 7:35:04 AM 8/21/2024",
-        "V.S 7:36:54 AM 8/21/2024",
-        "H.T 7:37:04 AM 8/21/2024",
-        "V.S 7:38:54 AM 8/21/2024",
-        "H.T 7:39:04 AM 8/21/2024",
-        "V.S 7:40:54 AM 8/21/2024",
-        "H.T 7:41:04 AM 8/21/2024",
-        "V.S 7:42:54 AM 8/21/2024",
-        "H.T 7:43:04 AM 8/21/2024",
-        "V.S 7:44:54 AM 8/21/2024",
-      ],
+      recentTemplates: [],
+      templatesWithIds: []
     };
     this.recognition = null;
     this.textAreaRef = React.createRef();
@@ -78,6 +62,46 @@ class Home extends Component {
         console.error("Speech recognition error:", event.error);
       };
     }
+
+    // User id
+    const { userid } = this.context;
+
+    // load templates
+    axios.post('http://localhost:3850/api/getAllTemplates', {
+      userid: userid
+    }).then(response => {
+      const templates = response.data;
+      // Function to get all template IDs
+  const getTemplateIds = (templates) => {
+    return templates
+      .filter(template => template.templateid) // Ensure templateid exists
+      .map(template => template.templateid); // Extract templateid values
+  };
+  // Get the list of template IDs
+  const templateIds = getTemplateIds(templates);
+  this.setState({recentTemplates:templateIds, templatesWithIds: templates})
+      // console.log(this.state.templatesWithIds);
+      
+    }).catch(error => {
+      if (error.response) {
+        if (error.response.status === 500) {
+          console.error('Server error:', error.response.data.message);
+          alert('Internal server error');
+        } else {
+          console.error('Unhandled error:', error.response.data.message);
+          alert('An unexpected error occurred');
+        }
+      } else if (error.request) {
+        // No response received from server
+        console.error('No response from server');
+        alert('No response from server');
+      } else {
+        // Request setup or other client-side error
+        console.error('Error setting up request:', error.message);
+        alert('Error in request setup');
+      }
+    });
+
   }
 
 
@@ -122,11 +146,11 @@ class Home extends Component {
     const { selectedTemplate, transcription } = this.state;
     const genAI = new GoogleGenerativeAI(config.apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
+
     // User id
     const { userid } = this.context;
     // console.log('userid', userid)
-    
+
     // Generate the response
     // Check if the selected option is "Vital Signs"
     if (selectedTemplate === "Vital Signs") {
@@ -214,30 +238,30 @@ class Home extends Component {
             userid: userid,
             templateid: newTemplateName,
             template: text,
-        }).catch(error => {
+          }).catch(error => {
             if (error.response) {
-                if (error.response.status === 500) {
-                    console.error('Server error:', error.response.data.message);
-                    alert('Internal server error');
-                } else {
-                    console.error('Unhandled error:', error.response.data.message);
-                    alert('An unexpected error occurred');
-                }
+              if (error.response.status === 500) {
+                console.error('Server error:', error.response.data.message);
+                alert('Internal server error');
+              } else {
+                console.error('Unhandled error:', error.response.data.message);
+                alert('An unexpected error occurred');
+              }
             } else if (error.request) {
-                // No response received from server
-                console.error('No response from server');
-                alert('No response from server');
+              // No response received from server
+              console.error('No response from server');
+              alert('No response from server');
             } else {
-                // Request setup or other client-side error
-                console.error('Error setting up request:', error.message);
-                alert('Error in request setup');
+              // Request setup or other client-side error
+              console.error('Error setting up request:', error.message);
+              alert('Error in request setup');
             }
-        });
+          });
 
           // Update the recentTemplates list by appending the new template name
-        this.setState(prevState => ({
-          recentTemplates: [...prevState.recentTemplates, newTemplateName]
-        }));
+          this.setState(prevState => ({
+            recentTemplates: [...prevState.recentTemplates, newTemplateName]
+          }));
         }
         finally {
           this.setState({ isLoading: false });
@@ -340,35 +364,35 @@ class Home extends Component {
           // Create a new template entry
           const newTemplateName = `H.T ${time} ${date}`;
 
-        // Save template to database
-        axios.post('http://localhost:3850/api/templates', {
-          userid: userid,
-          templateid: newTemplateName,
-          template: text,
-      }).catch(error => {
-          if (error.response) {
+          // Save template to database
+          axios.post('http://localhost:3850/api/templates', {
+            userid: userid,
+            templateid: newTemplateName,
+            template: text,
+          }).catch(error => {
+            if (error.response) {
               if (error.response.status === 500) {
-                  console.error('Server error:', error.response.data.message);
-                  alert('Internal server error');
+                console.error('Server error:', error.response.data.message);
+                alert('Internal server error');
               } else {
-                  console.error('Unhandled error:', error.response.data.message);
-                  alert('An unexpected error occurred');
+                console.error('Unhandled error:', error.response.data.message);
+                alert('An unexpected error occurred');
               }
-          } else if (error.request) {
+            } else if (error.request) {
               // No response received from server
               console.error('No response from server');
               alert('No response from server');
-          } else {
+            } else {
               // Request setup or other client-side error
               console.error('Error setting up request:', error.message);
               alert('Error in request setup');
-          }
-      });
-      
+            }
+          });
+
           // Update the recentTemplates list by appending the new template name
-        this.setState(prevState => ({
-          recentTemplates: [...prevState.recentTemplates, newTemplateName]
-        }));
+          this.setState(prevState => ({
+            recentTemplates: [...prevState.recentTemplates, newTemplateName]
+          }));
         }
 
         finally {
@@ -387,7 +411,7 @@ class Home extends Component {
       document.body.removeChild(link);
     }
   }
-  
+
 
   render() {
     const { isRecording, transcription, isLoading, recentTemplates } = this.state;
