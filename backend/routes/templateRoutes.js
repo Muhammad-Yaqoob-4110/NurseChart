@@ -6,6 +6,6 @@ const templateController = require("../controllers/templateController");
 router.post("/templates", templateController.createTemplate);
 
 // create a template
-router.get('/templates', templateController.getAllTemplates);
+router.post('/getAllTemplates', templateController.getAllTemplates);
 
 module.exports = router;
