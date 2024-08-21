@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import Joi, { resolve } from "joi-browser";
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
+import { UserContext } from './UserContext';
 
 class Register extends Component {
+    static contextType = UserContext;
     state = {
         newUser: {
             fullname: "",
@@ -100,6 +102,13 @@ class Register extends Component {
                 }).then(response => {
                     this.setState({ isLoading: false });
                     // console.log(response.data);
+                    // Set userid in context
+                    
+                    if (this.context && typeof this.context.setUserId === 'function') {
+                        this.context.setUserId(response.data.userid);
+                    } else {
+                        console.error('setUserId method is not available in context');
+                    }
                     this.setState({ redirectToHome: true });
                 }).catch(error => {
                     this.setState({ isLoading: false });
