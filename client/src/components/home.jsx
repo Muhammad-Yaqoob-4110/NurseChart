@@ -470,9 +470,9 @@ class Home extends Component {
 
                     {/* Conditionally render "See More..." if more than 10 templates exist */}
                     {templatesToDisplay.length >= 10 && (
-                      <a className='text-blue-600 hover:cursor-pointer hover:underline'>
+                      <Link className='text-blue-600 hover:cursor-pointer hover:underline' to="all-templates">
                         See More...
-                      </a>
+                      </Link>
                     )}
                   </ul>
 
