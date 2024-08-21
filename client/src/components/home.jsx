@@ -414,6 +414,9 @@ class Home extends Component {
       this.generatePdf("Head to Toe Assessment", text, "HeadToToeAssessmentReport")
     }
   }
+  hanldeNewTemplateEntry = () =>{
+    this.setState({transcription:""})
+  }
   render() {
     const { isRecording, transcription, isLoading, recentTemplates } = this.state;
     const templatesToDisplay = recentTemplates.slice(-10); // Get the last 10 templates
@@ -502,6 +505,9 @@ class Home extends Component {
                     </button>
                     <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={this.handleStopRecording}>
                       Stop Recording
+                    </button>
+                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={this.hanldeNewTemplateEntry}>
+                    Clear for New Template
                     </button>
                   </div>
                   <textarea ref={this.textAreaRef} className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder='Transcription will appear here.' id="transcription" name="transcription" value={transcription} readOnly rows="6" cols="50">
