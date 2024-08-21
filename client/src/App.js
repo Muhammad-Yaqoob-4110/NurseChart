@@ -5,6 +5,7 @@ import Login from "./components/login";
 import Register from "./components/register";
 import Home from "./components/home";
 import Loggedout from "./components/loggedout";
+import { UserProvider } from "./components/UserContext";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function NurseChart() {
 
   return (
     <>
+    <UserProvider>
       <Navbar text={navbarText} />
       <div>
         <Routes>
@@ -51,6 +53,7 @@ function NurseChart() {
           <Route path="/loggedout" element={<Loggedout />} />
         </Routes>
       </div>
+      </UserProvider>
     </>
   );
 }

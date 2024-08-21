@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import Joi from 'joi-browser'
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
+import { UserContext } from './UserContext';
 
 class Login extends Component {
+    static contextType = UserContext;
     state = {
         user: {
             username: "",
@@ -59,8 +61,20 @@ class Login extends Component {
                 this.setState({ isLoading: false });
                 if (response.status === 200) {
                     // console.log('Login successful:', response.data); 
+
+                    // Set userid in context
+                    // this.context.setUserId(response.data.userid);
+
+                    // Set userid in context
+                    if (this.context && typeof this.context.setUserId === 'function') {
+                        this.context.setUserId(response.data.userid);
+                    } else {
+                        console.error('setUserId method is not available in context');
+                    }
                     // Navigate to home
                     this.setState({ redirectToHome: true });
+
+
                     // You can show a success message here
                 }
             })

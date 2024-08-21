@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import config from './config';
 import { jsPDF } from 'jspdf';
+import { UserContext } from './UserContext';
 
 class Home extends Component {
+  static contextType = UserContext;
   constructor(props) {
     super(props);
     this.state = {
@@ -337,6 +339,8 @@ class Home extends Component {
   render() {
     const { isRecording, transcription, isLoading, recentTemplates } = this.state;
     const templatesToDisplay = recentTemplates.slice(-10); // Get the last 10 templates
+    const { userid } = this.context;
+    console.log('userid', userid)
     return (
       <div className='relative'>
         {isLoading && (
