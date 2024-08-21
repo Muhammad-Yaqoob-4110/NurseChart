@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import config from './config';
 import { jsPDF } from 'jspdf';
 import { UserContext } from './UserContext';
+import axios from 'axios';
 
 class Home extends Component {
   static contextType = UserContext;
@@ -121,7 +122,11 @@ class Home extends Component {
     const { selectedTemplate, transcription } = this.state;
     const genAI = new GoogleGenerativeAI(config.apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
+    
+    // User id
+    const { userid } = this.context;
+    // console.log('userid', userid)
+    
     // Generate the response
     // Check if the selected option is "Vital Signs"
     if (selectedTemplate === "Vital Signs") {
@@ -204,6 +209,31 @@ class Home extends Component {
           // Create a new template entry
           const newTemplateName = `V.S ${time} ${date}`;
 
+          // Save template to database
+          axios.post('http://localhost:3850/api/templates', {
+            userid: userid,
+            templateid: newTemplateName,
+            template: text,
+        }).catch(error => {
+            if (error.response) {
+                if (error.response.status === 500) {
+                    console.error('Server error:', error.response.data.message);
+                    alert('Internal server error');
+                } else {
+                    console.error('Unhandled error:', error.response.data.message);
+                    alert('An unexpected error occurred');
+                }
+            } else if (error.request) {
+                // No response received from server
+                console.error('No response from server');
+                alert('No response from server');
+            } else {
+                // Request setup or other client-side error
+                console.error('Error setting up request:', error.message);
+                alert('Error in request setup');
+            }
+        });
+
           // Update the recentTemplates list by appending the new template name
         this.setState(prevState => ({
           recentTemplates: [...prevState.recentTemplates, newTemplateName]
@@ -278,8 +308,6 @@ class Home extends Component {
 
   Provide concise keywords or short phrases summarizing the key findings for each section.
 `;
-
-
       const run = async () => {
         try {
           const result = await model.generateContent(headToToePrompt);
@@ -312,6 +340,31 @@ class Home extends Component {
           // Create a new template entry
           const newTemplateName = `H.T ${time} ${date}`;
 
+        // Save template to database
+        axios.post('http://localhost:3850/api/templates', {
+          userid: userid,
+          templateid: newTemplateName,
+          template: text,
+      }).catch(error => {
+          if (error.response) {
+              if (error.response.status === 500) {
+                  console.error('Server error:', error.response.data.message);
+                  alert('Internal server error');
+              } else {
+                  console.error('Unhandled error:', error.response.data.message);
+                  alert('An unexpected error occurred');
+              }
+          } else if (error.request) {
+              // No response received from server
+              console.error('No response from server');
+              alert('No response from server');
+          } else {
+              // Request setup or other client-side error
+              console.error('Error setting up request:', error.message);
+              alert('Error in request setup');
+          }
+      });
+      
           // Update the recentTemplates list by appending the new template name
         this.setState(prevState => ({
           recentTemplates: [...prevState.recentTemplates, newTemplateName]
@@ -339,8 +392,7 @@ class Home extends Component {
   render() {
     const { isRecording, transcription, isLoading, recentTemplates } = this.state;
     const templatesToDisplay = recentTemplates.slice(-10); // Get the last 10 templates
-    const { userid } = this.context;
-    console.log('userid', userid)
+
     return (
       <div className='relative'>
         {isLoading && (
