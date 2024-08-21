@@ -100,6 +100,32 @@ class Home extends Component {
     // Check if the selected option is "Vital Signs"
     if (selectedTemplate === "Vital Signs") {
       this.setState({ isLoading: true });
+
+      // Nurse: "Good morning, Mr. Smith. I need to take some of your vital signs today. How are you feeling?"
+      // Patient: "Good morning. I’m feeling alright, just a little tired."
+
+      // Nurse: "Thank you for letting me know. Let's start with your temperature. Have you been feeling feverish lately?"
+      // Patient: "No, I haven't had a fever."
+
+      // Nurse: "Alright, your temperature is 98.6°F, which is normal. Now, I’ll check your pulse. Have you noticed any irregular heartbeat or palpitations recently?"
+      // Patient: "No, my heart feels fine."
+
+      // Nurse: "Your pulse is 72 beats per minute, which is also normal. I’ll now listen to your breathing. Have you had any difficulty breathing or shortness of breath?"
+      // Patient: "No, I’m breathing okay."
+
+      // Nurse: "Great, your respiration rate is 16 breaths per minute, which is normal. Let me check your blood pressure. Have you had any issues with high or low blood pressure?"
+      // Patient: "No, my blood pressure is usually pretty stable."
+
+      // Nurse: "Your blood pressure is 120/80 mmHg, which is within the normal range. Now, let’s check your oxygen saturation. Have you had any issues with oxygen levels or felt light-headed?"
+      // Patient: "No, I haven't felt light-headed."
+
+      // Nurse: "Your oxygen saturation is 98%, which is perfect. Lastly, on a scale of 1 to 10, how would you rate your pain right now?"
+      // Patient: "I’d say it’s about a 3. Just some mild discomfort in my back."
+
+      // Nurse: "Thank you for sharing that. And lastly, how's your blood sugar level been lately? Have you had any readings that were too high or too low?"
+      // Patient: "I checked this morning, and it was 90 mg/dL, which is normal for me."
+      // Nurse: "That’s good to hear. Your vital signs are all within normal limits, which is great. I'll document everything and let the doctor know."
+
       // Define the text from which you want to extract details
       const text = `
       Patient's vital signs are as follows: Temperature is 98.6°F, Pulse is 72 bpm, Respiration rate is 16 breaths per minute, Blood pressure is 120/80 mmHg, Oxygen saturation is 98%, Pain level is 3 out of 10, and Blood sugar level is 90 mg/dL.
@@ -107,17 +133,18 @@ class Home extends Component {
 
       // Define the prompt for extraction
       const prompt = `
-      Extract the following details from the text:
-      - Temperature
-      - Pulse
-      - Respiration
-      - Blood pressure
-      - Oxygen saturation
-      - Pain level
-      - Blood sugar level
+      Extract the following details from the text with their units in standard medical abbreviations:
+      - Temperature (e.g., °F, °C)
+      - Pulse (e.g., bpm)
+      - Respiration (e.g., breaths per minute)
+      - Blood pressure (e.g., mmHg)
+      - Oxygen saturation (e.g., %)
+      - Pain level (e.g., out of 10)
+      - Blood sugar level (e.g., mg/dL)
 
-      Text: ${text}
-      `;
+      Text: ${transcription}
+    `;
+
       const run = async () => {
         try {
           // const prompt = "Write a story about an AI and magic"
@@ -157,6 +184,36 @@ class Home extends Component {
     }
     if (selectedTemplate === "Head-to-Toe Assessment") {
       this.setState({ isLoading: true });
+      // Nurse: "How are you feeling today? Have you noticed any changes in your overall health?"
+      // Patient: "I feel fine. No major changes, just the usual aches and pains."
+
+      // Nurse: "Have you noticed any rashes, dry skin, or changes in your skin color?"
+      // Patient: "No, my skin feels normal. I haven't noticed any new rashes or anything unusual."
+
+      // Nurse: "Have you had any headaches, vision changes, or issues with your hearing?"
+      // Patient: "No headaches, and my vision and hearing are the same as usual."
+
+      // Nurse: "Are you experiencing any shortness of breath, coughing, or chest discomfort?"
+      // Patient: "No, I can breathe just fine. I haven’t had any chest pain or coughing."
+
+      // Nurse: "Have you felt any palpitations or noticed an irregular heartbeat?"
+      // Patient: "No, my heartbeat feels normal, and I haven’t noticed any irregularities."
+
+      // Nurse: "Have you had any abdominal pain, bloating, or changes in your bowel movements?"
+      // Patient: "No, my stomach feels fine, and my bowel movements have been regular."
+
+      // Nurse: "Have you experienced any swelling in your legs or noticed any changes in your ability to move around?"
+      // Patient: "No swelling, and I’m able to move around without any issues."
+
+      // Nurse: "Have you had any difficulty with urination, or have you noticed any changes in your urinary habits?"
+      // Patient: "No, everything seems normal. I haven’t had any trouble urinating."
+
+      // Nurse: "Any nausea, vomiting, or issues with your digestion?"
+      // Patient: "No nausea or vomiting, and my digestion seems fine."
+
+      // Nurse: "Do you have any wounds or dressings that need attention?"
+      // Patient: "No, I don’t have any wounds or bandages at the moment."
+
       const headToToeText = `
       General Appearance: The patient appears well-groomed, with normal posture. No signs of distress observed.
       Skin: The skin is warm, dry, and intact with no visible lesions.
@@ -170,21 +227,24 @@ class Home extends Component {
       Wounds and Dressings: No wounds present, and dressings are clean and dry without signs of infection.
       `;
 
-      const headToToePrompt = `
-    Extract the following details from the text:
-    - General Appearance
-    - Skin
-    - Head and Neck
-    - Chest and Lungs
-    - Heart
-    - Abdomen
-    - Extremities
-    - Genitourinary (GU) System
-    - Gastrointestinal (GI) System
-    - Wounds and Dressings
+    const headToToePrompt = `
+  Extract key details related to the following sections from the text. Focus on the main observations or findings:
+  - General Appearance
+  - Skin
+  - Head and Neck
+  - Chest and Lungs
+  - Heart
+  - Abdomen
+  - Extremities
+  - Genitourinary (GU) System
+  - Gastrointestinal (GI) System
+  - Wounds and Dressings
 
-    Text: ${headToToeText}
-    `;
+  Text: ${transcription}
+
+  Provide concise keywords or short phrases summarizing the key findings for each section.
+`;
+
 
       const run = async () => {
         try {
@@ -218,7 +278,16 @@ class Home extends Component {
           this.setState({ isLoading: false });
         }
       }
-        run();
+      run();
+    }
+    if (selectedTemplate === "Patient Education") {
+      // Trigger the download of the PDF
+      const link = document.createElement('a');
+      link.href = `${process.env.PUBLIC_URL}/SAMPLE PATIENT EDUCATION FOR HOME VISIT 1.pdf`;
+      link.download = 'SAMPLE PATIENT EDUCATION FOR HOME VISIT 1.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   }
 
