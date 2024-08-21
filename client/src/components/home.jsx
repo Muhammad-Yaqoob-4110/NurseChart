@@ -72,16 +72,16 @@ class Home extends Component {
     }).then(response => {
       const templates = response.data;
       // Function to get all template IDs
-  const getTemplateIds = (templates) => {
-    return templates
-      .filter(template => template.templateid) // Ensure templateid exists
-      .map(template => template.templateid); // Extract templateid values
-  };
-  // Get the list of template IDs
-  const templateIds = getTemplateIds(templates);
-  this.setState({recentTemplates:templateIds, templatesWithIds: templates})
+      const getTemplateIds = (templates) => {
+        return templates
+          .filter(template => template.templateid) // Ensure templateid exists
+          .map(template => template.templateid); // Extract templateid values
+      };
+      // Get the list of template IDs
+      const templateIds = getTemplateIds(templates);
+      this.setState({ recentTemplates: templateIds, templatesWithIds: templates })
       // console.log(this.state.templatesWithIds);
-      
+
     }).catch(error => {
       if (error.response) {
         if (error.response.status === 500) {
@@ -134,15 +134,16 @@ class Home extends Component {
     const date = now.toLocaleDateString(); // Get current date
     return { time, date };
   }
+  cleanUpResponse = (response) => {
+    return response
+      .replace(/-\s/g, '') // Remove dashes and following spaces
+      .replace(/\*\*/g, '') // Remove asterisks
+      .trim(); // Remove any leading/trailing whitespace
+  };
+
   // Handle button click event
   handleGenerateReport = () => {
-    // Function to clean up the string
-    const cleanUpResponse = (response) => {
-      return response
-        .replace(/-\s/g, '') // Remove dashes and following spaces
-        .replace(/\*\*/g, '') // Remove asterisks
-        .trim(); // Remove any leading/trailing whitespace
-    };
+
     const { selectedTemplate, transcription } = this.state;
     const genAI = new GoogleGenerativeAI(config.apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -209,26 +210,7 @@ class Home extends Component {
           console.log(text);
 
           // Create a PDF and save the generated text in it
-          const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-          });
-
-          const margin = 15;
-          // Set the font size to 11 and add the heading
-          doc.setFontSize(22);
-          doc.text("Vital Signs", margin, 25);
-
-          doc.setFontSize(11);
-          doc.setTextColor(50);
-
-          // Define how to split the text into lines that fit within the margins
-          const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
-          // Add the content with line wrapping
-          doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
-
-          doc.save("VitalSignsReport.pdf");
+          this.generatePdf("Vital Signs", text, "VitalSignsReport")
           const { time, date } = this.getCurrentDateTime();
           // Create a new template entry
           const newTemplateName = `V.S ${time} ${date}`;
@@ -338,27 +320,7 @@ class Home extends Component {
           const response = await result.response;
           const text = response.text();
           console.log(text);
-
-          const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-          });
-
-          const margin = 15;
-          // Set the font size to 11 and add the heading
-          doc.setFontSize(22);
-          doc.text("Head to Toe Assessment", margin, 25);
-
-          doc.setFontSize(11);
-          doc.setTextColor(50);
-
-          // Define how to split the text into lines that fit within the margins
-          const splitText = doc.splitTextToSize(cleanUpResponse(text), 180);
-          // Add the content with line wrapping
-          doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
-
-          doc.save("HeadToToeAssessmentReport.pdf");
+          this.generatePdf("Head to Toe Assessment", text, "HeadToToeAssessmentReport")
 
           const { time, date } = this.getCurrentDateTime();
           // Create a new template entry
@@ -412,7 +374,46 @@ class Home extends Component {
     }
   }
 
+// generate pdf
+ generatePdf = (heading, body, fileName) =>{
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
 
+  const margin = 15;
+  // Set the font size to 11 and add the heading
+  doc.setFontSize(22);
+  doc.text(heading, margin, 25);
+
+  doc.setFontSize(11);
+  doc.setTextColor(50);
+
+  // Define how to split the text into lines that fit within the margins
+  const splitText = doc.splitTextToSize(this.cleanUpResponse(body), 180);
+
+  // Add the content with line wrapping
+  doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+
+  doc.save(`${fileName}.pdf`);
+ }
+  onTemplateHandle = (templateId) => {
+    // Find the template with the matching templateid
+    const foundTemplate = this.state.templatesWithIds.find(
+      (templateObj) => templateObj.templateid === templateId
+    );
+
+    const text = foundTemplate['template']
+    // Create a PDF and save the generated text in it
+    if(templateId.startsWith("V.S")){
+
+      this.generatePdf("Vital Signs", text, "VitalSignsReport")
+    }
+    if(templateId.startsWith("H.T")){
+      this.generatePdf("Head to Toe Assessment", text, "HeadToToeAssessmentReport")
+    }
+  }
   render() {
     const { isRecording, transcription, isLoading, recentTemplates } = this.state;
     const templatesToDisplay = recentTemplates.slice(-10); // Get the last 10 templates
@@ -450,18 +451,28 @@ class Home extends Component {
                 <div className='lg:w-1/4 '>
                   <p>Recent Templates</p>
                   <ul className='flex lg:flex-col flex-wrap lg:gap-0 gap-2'>
-                    {templatesToDisplay.map((template, index) => (
-                      <a
-                        key={index}
-                        className='text-blue-600 hover:cursor-pointer hover:underline'
-                      >
-                        {template}
+                    {templatesToDisplay.length === 0 ? (
+                      <p className='text-red-600 text-sm'>No template added</p> // Show this message if there are no templates
+                    ) : (
+                      templatesToDisplay.map((template, index) => (
+                        <a
+                          onClick={() => this.onTemplateHandle(template)}
+                          key={index}
+                          className='text-blue-600 hover:cursor-pointer hover:underline'
+                        >
+                          {template}
+                        </a>
+                      ))
+                    )}
+
+                    {/* Conditionally render "See More..." if more than 10 templates exist */}
+                    {templatesToDisplay.length >= 10 && (
+                      <a className='text-blue-600 hover:cursor-pointer hover:underline'>
+                        See More...
                       </a>
-                    ))}
-                    <a className='text-blue-600 hover:cursor-pointer hover:underline'>
-                      See More...
-                    </a>
+                    )}
                   </ul>
+
                   {/* <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
                     Add New Patient
                   </button> */}
