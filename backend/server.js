@@ -5,6 +5,7 @@ const cors = require("cors");
 const bodyparcer = require("body-parser");
 require("./utils/db");
 const userRouter = require("./routes/userRoutes");
+const templateRouter = require("./routes/templateRoutes");
 
 // get fun has two arguments first is end point then call back (no need to call. Called automatically)function
 app.get("/", (req, res) => {
@@ -15,8 +16,11 @@ app.get("/", (req, res) => {
 app.use(bodyparcer.json());
 app.use(cors());
 
-// Product API
+// User API
 app.use("/api", userRouter);
+
+// Template API
+app.use("/api", templateRouter);
 
 app.get("/welcome", (req, res) => {
   res.send("<h1>Welcome Ali Ahmed</h1>");
