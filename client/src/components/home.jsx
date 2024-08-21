@@ -12,6 +12,24 @@ class Home extends Component {
       transcription: '',
       selectedTemplate: '',
       isLoading: false,
+      recentTemplates: [
+        "H.T 7:29:04 AM 8/21/2024",
+        "V.S 7:30:54 AM 8/21/2024",
+        "H.T 7:31:04 AM 8/21/2024",
+        "V.S 7:32:54 AM 8/21/2024",
+        "H.T 7:33:04 AM 8/21/2024",
+        "V.S 7:34:54 AM 8/21/2024",
+        "H.T 7:35:04 AM 8/21/2024",
+        "V.S 7:36:54 AM 8/21/2024",
+        "H.T 7:37:04 AM 8/21/2024",
+        "V.S 7:38:54 AM 8/21/2024",
+        "H.T 7:39:04 AM 8/21/2024",
+        "V.S 7:40:54 AM 8/21/2024",
+        "H.T 7:41:04 AM 8/21/2024",
+        "V.S 7:42:54 AM 8/21/2024",
+        "H.T 7:43:04 AM 8/21/2024",
+        "V.S 7:44:54 AM 8/21/2024",
+      ],
     };
     this.recognition = null;
     this.textAreaRef = React.createRef();
@@ -82,7 +100,13 @@ class Home extends Component {
     this.setState({ selectedTemplate: event.target.value });
   }
 
-
+  // Function to get current date and time
+  getCurrentDateTime() {
+    const now = new Date();
+    const time = now.toLocaleTimeString(); // Get current time
+    const date = now.toLocaleDateString(); // Get current date
+    return { time, date };
+  }
   // Handle button click event
   handleGenerateReport = () => {
     // Function to clean up the string
@@ -142,7 +166,7 @@ class Home extends Component {
       - Pain level (e.g., out of 10)
       - Blood sugar level (e.g., mg/dL)
 
-      Text: ${transcription}
+      Text: ${text}
     `;
 
       const run = async () => {
@@ -174,6 +198,14 @@ class Home extends Component {
           doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
 
           doc.save("VitalSignsReport.pdf");
+          const { time, date } = this.getCurrentDateTime();
+          // Create a new template entry
+          const newTemplateName = `V.S ${time} ${date}`;
+
+          // Update the recentTemplates list by appending the new template name
+        this.setState(prevState => ({
+          recentTemplates: [...prevState.recentTemplates, newTemplateName]
+        }));
         }
         finally {
           this.setState({ isLoading: false });
@@ -227,7 +259,7 @@ class Home extends Component {
       Wounds and Dressings: No wounds present, and dressings are clean and dry without signs of infection.
       `;
 
-    const headToToePrompt = `
+      const headToToePrompt = `
   Extract key details related to the following sections from the text. Focus on the main observations or findings:
   - General Appearance
   - Skin
@@ -240,7 +272,7 @@ class Home extends Component {
   - Gastrointestinal (GI) System
   - Wounds and Dressings
 
-  Text: ${transcription}
+  Text: ${headToToeText}
 
   Provide concise keywords or short phrases summarizing the key findings for each section.
 `;
@@ -273,7 +305,17 @@ class Home extends Component {
           doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
 
           doc.save("HeadToToeAssessmentReport.pdf");
+
+          const { time, date } = this.getCurrentDateTime();
+          // Create a new template entry
+          const newTemplateName = `H.T ${time} ${date}`;
+
+          // Update the recentTemplates list by appending the new template name
+        this.setState(prevState => ({
+          recentTemplates: [...prevState.recentTemplates, newTemplateName]
+        }));
         }
+
         finally {
           this.setState({ isLoading: false });
         }
@@ -290,9 +332,11 @@ class Home extends Component {
       document.body.removeChild(link);
     }
   }
+  
 
   render() {
-    const { isRecording, transcription, isLoading } = this.state;
+    const { isRecording, transcription, isLoading, recentTemplates } = this.state;
+    const templatesToDisplay = recentTemplates.slice(-10); // Get the last 10 templates
     return (
       <div className='relative'>
         {isLoading && (
@@ -310,7 +354,7 @@ class Home extends Component {
         )}
         <div className='w-full h-full'>
           <div className='flex justify-center items-center mt-8'>
-            <div className='lg:w-[632px] w-11/12 p-6 bg-white rounded-[7px]'>
+            <div className='lg:w-[900px] w-11/12 p-6 bg-white rounded-[7px]'>
               <div className=" flex bg-[#00817FFF] p-4">
                 <div className='w-4/5 '>
                   <h4 className="text-center font-bold text-lg text-white">NurseChart</h4>
@@ -324,16 +368,23 @@ class Home extends Component {
               <div className='flex lg:flex-row flex-col gap-1 grid-cols-2 mt-1'>
                 {/* Left Section */}
                 <div className='lg:w-1/4 '>
-                  <ul className='flex flex-col gap-0'>
-                    <p>Patient List</p>
-                    <a className='text-blue-600 hover:cursor-pointer hover:underline'>Ali Ahmed</a>
-                    <a className='text-blue-600 hover:cursor-pointer hover:underline'>Ali Ahmed</a>
-                    <a className='text-blue-600 hover:cursor-pointer hover:underline'>Ali Ahmed</a>
-                    <a className='text-blue-600 hover:cursor-pointer hover:underline'>See More...</a>
+                  <p>Recent Templates</p>
+                  <ul className='flex lg:flex-col flex-wrap lg:gap-0 gap-2'>
+                    {templatesToDisplay.map((template, index) => (
+                      <a
+                        key={index}
+                        className='text-blue-600 hover:cursor-pointer hover:underline'
+                      >
+                        {template}
+                      </a>
+                    ))}
+                    <a className='text-blue-600 hover:cursor-pointer hover:underline'>
+                      See More...
+                    </a>
                   </ul>
-                  <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
+                  {/* <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
                     Add New Patient
-                  </button>
+                  </button> */}
                 </div>
                 {/* Right Section */}
                 <div className='flex flex-col gap-2 lg:w-3/4 '>
