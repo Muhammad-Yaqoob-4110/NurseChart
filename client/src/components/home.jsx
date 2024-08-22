@@ -475,7 +475,7 @@ const Home = () => {
 
                                     {/* Conditionally render "See More..." if more than 10 templates exist */}
                                     {templatesToDisplay.length >= 10 && (
-                                        <Link className='text-blue-600 hover:cursor-pointer hover:underline' to="all-templates" state={{ recentTemplates: recentTemplates }}>
+                                        <Link className='text-blue-600 hover:cursor-pointer hover:underline' to="all-templates" state={{ templatesWithIds: templatesWithIds }}>
                                             See More...
                                         </Link>
                                     )}
