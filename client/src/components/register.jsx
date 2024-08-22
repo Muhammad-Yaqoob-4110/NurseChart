@@ -2,10 +2,8 @@ import React, { Component } from 'react';
 import Joi, { resolve } from "joi-browser";
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import { UserContext } from './UserContext';
 
 class Register extends Component {
-    static contextType = UserContext;
     state = {
         newUser: {
             fullname: "",
@@ -22,7 +20,8 @@ class Register extends Component {
         redirectToHome: false,
         isLoading: false,
         usernames:[],
-        useremails:[]
+        useremails:[],
+        userinfo: ""
     };
 
     async componentDidMount() {
@@ -104,12 +103,16 @@ class Register extends Component {
                     // console.log(response.data);
                     // Set userid in context
                     
-                    if (this.context && typeof this.context.setUserId === 'function') {
-                        this.context.setUserId(response.data.userid);
-                    } else {
-                        console.error('setUserId method is not available in context');
-                    }
-                    this.setState({ redirectToHome: true });
+                    // if (this.context && typeof this.context.setUserId === 'function') {
+                    //     this.context.setUserId(response.data.userid);
+                    // } else {
+                    //     console.error('setUserId method is not available in context');
+                    // }
+                    const userid = response.data['userid']
+                    this.setState({ 
+                        redirectToHome: true, 
+                        userinfo: userid 
+                    });
                 }).catch(error => {
                     this.setState({ isLoading: false });
                     if (error.response) {
@@ -157,7 +160,7 @@ class Register extends Component {
     };
     render() {
         if (this.state.redirectToHome) {
-            return <Navigate to="/home" />;
+            return <Navigate to="/home" state={{ userid: this.state.userinfo }}/>;
           }
           const { isLoading } = this.state;
         return (
