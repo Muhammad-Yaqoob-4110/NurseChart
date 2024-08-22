@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import Joi from 'joi-browser'
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import { UserContext } from './UserContext';
+// import { UserContext } from './UserContext';
 
 class Login extends Component {
-    static contextType = UserContext;
+    // static contextType = UserContext;
     state = {
         user: {
             username: "",
@@ -17,6 +17,7 @@ class Login extends Component {
         },
         redirectToHome: false,
         isLoading: false,
+        userinfo: "",
     };
     schema = {
         username: Joi.string().required().label("User Name"),
@@ -64,15 +65,21 @@ class Login extends Component {
 
                     // Set userid in context
                     // this.context.setUserId(response.data.userid);
-
-                    // Set userid in context
-                    if (this.context && typeof this.context.setUserId === 'function') {
-                        this.context.setUserId(response.data.userid);
-                    } else {
-                        console.error('setUserId method is not available in context');
-                    }
+                    // console.log(response.data)
+                    // // Set userid in context
+                    // if (this.context && typeof this.context.setUserId === 'function') {
+                    //     this.context.setUserId(response.data.userid);
+                    // } else {
+                    //     console.error('setUserId method is not available in context');
+                    // }
+                    const userid = response.data['userid']
+                    // console.log('user', userid)
+                    // this.setState({userinfo: userid})
                     // Navigate to home
-                    this.setState({ redirectToHome: true });
+                    this.setState({ 
+                        redirectToHome: true, 
+                        userinfo: userid 
+                    });
 
 
                     // You can show a success message here
@@ -148,8 +155,8 @@ class Login extends Component {
         this.setState({ user: this.state.user });
     };
     render() {
-        if (this.state.redirectToHome) {
-            return <Navigate to="/home" />;
+        if (this.state.redirectToHome && this.state.userinfo) {
+            return <Navigate to="/home" state={{ userid: this.state.userinfo }} />;
         }
         const { isLoading } = this.state;
         return (
