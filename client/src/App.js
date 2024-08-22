@@ -6,6 +6,7 @@ import Register from "./components/register";
 import Home from "./components/home";
 import Loggedout from "./components/loggedout";
 import { UserProvider } from "./components/UserContext";
+import Alltemplates from "./components/alltemplates";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function NurseChart() {
           <Route path="/register" element={<Register />} />
           <Route path="/home" element={<Home />} />
           <Route path="/loggedout" element={<Loggedout />} />
+          <Route path="home/all-templates" element = {<Alltemplates/>}/>
         </Routes>
       </div>
       </UserProvider>
