@@ -1,139 +1,151 @@
 import axios from 'axios';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Link , useLocation} from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import config from './config';
 import { jsPDF } from 'jspdf';
+import Modal from './Modal';
 
 const Home = () => {
-    const location = useLocation();
-    const { userid } = location.state || {};
-    const [isRecording, setIsRecording] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [recentTemplates, setRecentTemplates] = useState([]);
-    const [templatesWithIds, setTemplatesWithIds] = useState([]);
-    const [transcription, setTranscription] = useState('');
-    const [selectedTemplate, setSelectedTemplate] = useState('');
-    const templatesToDisplay = recentTemplates.slice(-10);
+  const location = useLocation();
+  const { userid } = location.state || {};
+  const [isRecording, setIsRecording] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [recentTemplates, setRecentTemplates] = useState([]);
+  const [templatesWithIds, setTemplatesWithIds] = useState([]);
+  const [transcription, setTranscription] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [showModal, setShowModal] = useState(false)
+  const [extractedInformation, setextractedInformation] = useState("")
+  const templatesToDisplay = recentTemplates.slice(-10);
 
-    const textAreaRef = useRef(null);
-    const recognitionRef = useRef(null);
+  const textAreaRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const modalResolveRef = useRef(null);
 
-    useEffect(() => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-          const recognition = new SpeechRecognition();
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognitionRef.current = recognition;
-    
-          recognition.onresult = (event) => {
-            let interimTranscript = '';
-            let finalTranscript = '';
-    
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              const transcript = event.results[i][0].transcript;
-              if (event.results[i].isFinal) {
-                finalTranscript += transcript;
-              } else {
-                interimTranscript += transcript;
-              }
-            }
-    
-            // Update the state only with the final transcript when the speech is finalized
-            setTranscription(prevTranscription => prevTranscription + finalTranscript);
-    
-            // Update interim transcript separately without appending to state
-            if (textAreaRef.current) {
-              textAreaRef.current.value = transcription + interimTranscript;
-              // Scroll the text area to the bottom after transcription update
-              textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
-            }
-          };
-    
-          recognition.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
-          };
-    
-          // Cleanup on component unmount
-          return () => {
-            if (recognitionRef.current) {
-              recognitionRef.current.stop();
-              recognitionRef.current = null;
-            }
-          };
-        }
-      }, []); // Empty dependency array ensures this runs only once on mount and unmount
-      
-      useEffect(() => {
-        // Load templates
-        if (userid) {
-          axios.post('http://localhost:3850/api/getAllTemplates', { userid })
-            .then(response => {
-              const templates = response.data;
-    
-              // Function to get all template IDs
-              const getTemplateIds = (templates) => {
-                return templates
-                  .filter(template => template.templateid) // Ensure templateid exists
-                  .map(template => template.templateid); // Extract templateid values
-              };
-    
-              // Get the list of template IDs
-              const templateIds = getTemplateIds(templates);
-              setRecentTemplates(templateIds);
-              setTemplatesWithIds(templates);
-            })
-            .catch(error => {
-              if (error.response) {
-                if (error.response.status === 500) {
-                  console.error('Server error:', error.response.data.message);
-                  alert('Internal server error');
-                } else {
-                  console.error('Unhandled error:', error.response.data.message);
-                  alert('An unexpected error occurred');
-                }
-              } else if (error.request) {
-                // No response received from server
-                console.error('No response from server');
-                alert('No response from server');
-              } else {
-                // Request setup or other client-side error
-                console.error('Error setting up request:', error.message);
-                alert('Error in request setup');
-              }
-            });
-        }
-      }, [userid]); // Re-run when userid changes
-
-      // Function to start recording
-      const handleRecording = useCallback(() => {
-        if (recognitionRef.current && !isRecording) {
-          recognitionRef.current.start();
-          setIsRecording(true);
-        } else {
-          console.error("SpeechRecognition is not initialized or is already recording.");
-        }
-      }, [isRecording]);
-    
-      // Function to stop recording
-      const handleStopRecording = useCallback(() => {
-        if (recognitionRef.current && isRecording) {
-          recognitionRef.current.stop();
-          setIsRecording(false);
-        } else {
-          console.error("SpeechRecognition is not initialized or is not recording.");
-        }
-      }, [isRecording]);
-    
-
-    // Handle dropdown selection change
-    const handleSelectChange = (event) => {
-        setSelectedTemplate(event.target.value)
+  useEffect(() => {
+    // Resolves the promise with the updated transcription when the modal closes
+    if (!showModal && modalResolveRef.current) {
+      modalResolveRef.current(extractedInformation); // Pass the latest transcription
+      modalResolveRef.current = null;
     }
+  }, [showModal, extractedInformation]);
 
-    // Handle button click event
- const handleGenerateReport = () => {
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognitionRef.current = recognition;
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // Update the state only with the final transcript when the speech is finalized
+        setTranscription(prevTranscription => prevTranscription + finalTranscript);
+
+        // Update interim transcript separately without appending to state
+        if (textAreaRef.current) {
+          textAreaRef.current.value = transcription + interimTranscript;
+          // Scroll the text area to the bottom after transcription update
+          textAreaRef.current.scrollTop = textAreaRef.current.scrollHeight;
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+      };
+
+      // Cleanup on component unmount
+      return () => {
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+          recognitionRef.current = null;
+        }
+      };
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount and unmount
+
+  useEffect(() => {
+    // Load templates
+    if (userid) {
+      axios.post('http://localhost:3850/api/getAllTemplates', { userid })
+        .then(response => {
+          const templates = response.data;
+
+          // Function to get all template IDs
+          const getTemplateIds = (templates) => {
+            return templates
+              .filter(template => template.templateid) // Ensure templateid exists
+              .map(template => template.templateid); // Extract templateid values
+          };
+
+          // Get the list of template IDs
+          const templateIds = getTemplateIds(templates);
+          setRecentTemplates(templateIds);
+          setTemplatesWithIds(templates);
+        })
+        .catch(error => {
+          if (error.response) {
+            if (error.response.status === 500) {
+              console.error('Server error:', error.response.data.message);
+              alert('Internal server error');
+            } else {
+              console.error('Unhandled error:', error.response.data.message);
+              alert('An unexpected error occurred');
+            }
+          } else if (error.request) {
+            // No response received from server
+            console.error('No response from server');
+            alert('No response from server');
+          } else {
+            // Request setup or other client-side error
+            console.error('Error setting up request:', error.message);
+            alert('Error in request setup');
+          }
+        });
+    }
+  }, [userid]); // Re-run when userid changes
+
+  // Function to start recording
+  const handleRecording = useCallback(() => {
+    if (recognitionRef.current && !isRecording) {
+      recognitionRef.current.start();
+      setIsRecording(true);
+    } else {
+      console.error("SpeechRecognition is not initialized or is already recording.");
+    }
+  }, [isRecording]);
+
+  // Function to stop recording
+  const handleStopRecording = useCallback(() => {
+    if (recognitionRef.current && isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      console.error("SpeechRecognition is not initialized or is not recording.");
+    }
+  }, [isRecording]);
+
+
+  // Handle dropdown selection change
+  const handleSelectChange = (event) => {
+    setSelectedTemplate(event.target.value)
+  }
+
+  // Handle button click event
+  const handleGenerateReport = () => {
 
     // const { selectedTemplate, transcription } = this.state;
 
@@ -147,7 +159,7 @@ const Home = () => {
     // Generate the response
     // Check if the selected option is "Vital Signs"
     if (selectedTemplate === "Vital Signs") {
-        setIsLoading(true)
+      setIsLoading(true)
 
       // Nurse: "Good morning, Mr. Smith. I need to take some of your vital signs today. How are you feeling?"
       // Patient: "Good morning. I’m feeling alright, just a little tired."
@@ -198,11 +210,21 @@ const Home = () => {
           // const prompt = "Write a story about an AI and magic"
           const result = await model.generateContent(prompt);
           const response = await result.response;
-          const text = response.text();
-          console.log(text);
+          const text = await response.text();
+          // console.log(text);
+          setextractedInformation(text)
+          setShowModal(true);
+          setIsLoading(false)
 
+          // Create a promise that resolves when the modal is closed
+          const updatedTranscription = await new Promise((resolve) => {
+            modalResolveRef.current = resolve;
+          });
+
+          setIsLoading(true)
           // Create a PDF and save the generated text in it
-          generatePdf("Vital Signs", text, "VitalSignsReport")
+          generatePdf("Vital Signs", updatedTranscription, "VitalSignsReport")
+          // console.log("extracted and edited", updatedTranscription)
           const { time, date } = getCurrentDateTime();
           // Create a new template entry
           const newTemplateName = `V.S ${time} ${date}`;
@@ -211,7 +233,7 @@ const Home = () => {
           axios.post('http://localhost:3850/api/templates', {
             userid: userid,
             templateid: newTemplateName,
-            template: text,
+            template: updatedTranscription,
           }).catch(error => {
             if (error.response) {
               if (error.response.status === 500) {
@@ -239,14 +261,14 @@ const Home = () => {
           ]);
         }
         finally {
-            setIsLoading(false)
+          setIsLoading(false)
         }
       }
       run();
 
     }
     if (selectedTemplate === "Head-to-Toe Assessment") {
-        setIsLoading(true);
+      setIsLoading(true);
       // Nurse: "How are you feeling today? Have you noticed any changes in your overall health?"
       // Patient: "I feel fine. No major changes, just the usual aches and pains."
 
@@ -312,8 +334,23 @@ const Home = () => {
           const result = await model.generateContent(headToToePrompt);
           const response = await result.response;
           const text = response.text();
-          console.log(text);
-          generatePdf("Head to Toe Assessment", text, "HeadToToeAssessmentReport")
+          // console.log(text);
+
+          
+          setextractedInformation(text)
+          setShowModal(true);
+          setIsLoading(false)
+
+          // Create a promise that resolves when the modal is closed
+          const updatedTranscription = await new Promise((resolve) => {
+            modalResolveRef.current = resolve;
+          });
+
+          setIsLoading(true)
+          // Create a PDF and save the generated text in it
+          // generatePdf("Vital Signs", updatedTranscription, "VitalSignsReport")
+
+          generatePdf("Head to Toe Assessment", updatedTranscription, "HeadToToeAssessmentReport")
 
           const { time, date } = getCurrentDateTime();
           // Create a new template entry
@@ -323,7 +360,7 @@ const Home = () => {
           axios.post('http://localhost:3850/api/templates', {
             userid: userid,
             templateid: newTemplateName,
-            template: text,
+            template: updatedTranscription,
           }).catch(error => {
             if (error.response) {
               if (error.response.status === 500) {
@@ -352,7 +389,7 @@ const Home = () => {
         }
 
         finally {
-            setIsLoading(false)
+          setIsLoading(false)
         }
       }
       run();
@@ -368,44 +405,44 @@ const Home = () => {
     }
   }
 
-// generate pdf
- const generatePdf = (heading, body, fileName) =>{
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4',
-  });
+  // generate pdf
+  const generatePdf = (heading, body, fileName) => {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
 
-  const margin = 15;
-  // Set the font size to 11 and add the heading
-  doc.setFontSize(22);
-  doc.text(heading, margin, 25);
+    const margin = 15;
+    // Set the font size to 11 and add the heading
+    doc.setFontSize(22);
+    doc.text(heading, margin, 25);
 
-  doc.setFontSize(11);
-  doc.setTextColor(50);
+    doc.setFontSize(11);
+    doc.setTextColor(50);
 
-  // Define how to split the text into lines that fit within the margins
-  const splitText = doc.splitTextToSize(cleanUpResponse(body), 180);
+    // Define how to split the text into lines that fit within the margins
+    const splitText = doc.splitTextToSize(cleanUpResponse(body), 180);
 
-  // Add the content with line wrapping
-  doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
+    // Add the content with line wrapping
+    doc.text(splitText, margin, 35, { maxWidth: 180, align: 'left' });
 
-  doc.save(`${fileName}.pdf`);
- }
- const cleanUpResponse = (response) => {
+    doc.save(`${fileName}.pdf`);
+  }
+  const cleanUpResponse = (response) => {
     return response
       .replace(/-\s/g, '') // Remove dashes and following spaces
       .replace(/\*\*/g, '') // Remove asterisks
       .trim(); // Remove any leading/trailing whitespace
   };
 
-    // Function to get current date and time
-    const getCurrentDateTime = ()=> {
-        const now = new Date();
-        const time = now.toLocaleTimeString(); // Get current time
-        const date = now.toLocaleDateString(); // Get current date
-        return { time, date };
-      }
+  // Function to get current date and time
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const time = now.toLocaleTimeString(); // Get current time
+    const date = now.toLocaleDateString(); // Get current date
+    return { time, date };
+  }
   const onTemplateHandle = (templateId) => {
     // Find the template with the matching templateid
     const foundTemplate = templatesWithIds.find(
@@ -414,124 +451,138 @@ const Home = () => {
 
     const text = foundTemplate['template']
     // Create a PDF and save the generated text in it
-    if(templateId.startsWith("V.S")){
+    if (templateId.startsWith("V.S")) {
 
       generatePdf("Vital Signs", text, "VitalSignsReport")
     }
-    if(templateId.startsWith("H.T")){
+    if (templateId.startsWith("H.T")) {
       generatePdf("Head to Toe Assessment", text, "HeadToToeAssessmentReport")
     }
   }
 
-    const hanldeNewTemplateEntry = () => {
-        setTranscription("")
-    }
-    return (
-        <div className='relative'>
-            {isLoading && (
-                <div className="absolute bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
-                    <div className="flex items-center">
-                        <span className="text-3xl mr-4"></span>
-                        <svg className="animate-spin h-8 w-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            )}
-            <div className='w-full h-full'>
-                <div className='flex justify-center items-center mt-8'>
-                    <div className='lg:w-[900px] w-11/12 p-6 bg-white rounded-[7px]'>
-                        <div className=" flex bg-[#00817FFF] p-4">
-                            <div className='w-4/5 '>
-                                <h4 className="text-center font-bold text-lg text-white">NurseChart</h4>
-                            </div>
-                            <div className='w-1/5  flex justify-end'>
-                                <Link class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" to="/loggedout">
-                                    Logout
-                                </Link>
-                            </div>
-                        </div>
-                        <div className='flex lg:flex-row flex-col gap-1 grid-cols-2 mt-1'>
-                            {/* Left Section */}
-                            <div className='lg:w-1/4 '>
-                                <p>Recent Templates</p>
-                                <ul className='flex lg:flex-col flex-wrap lg:gap-0 gap-2'>
-                                    {templatesToDisplay.length === 0 ? (
-                                        <p className='text-red-600 text-sm'>No template added</p> // Show this message if there are no templates
-                                    ) : (
-                                        templatesToDisplay.map((template, index) => (
-                                            <a
-                                                onClick={() => onTemplateHandle(template)}
-                                                key={index}
-                                                className='text-blue-600 hover:cursor-pointer hover:underline'
-                                            >
-                                                {template}
-                                            </a>
-                                        ))
-                                    )}
+  const hanldeNewTemplateEntry = () => {
+    setTranscription("")
+  }
+  return (
+    <div className='relative'>
+      {isLoading && (
+        <div className="absolute bg-white bg-opacity-60 z-10 h-full w-full flex items-center justify-center">
+          <div className="flex items-center">
+            <span className="text-3xl mr-4"></span>
+            <svg className="animate-spin h-8 w-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+          </div>
+        </div>
+      )}
+      <div className='w-full h-full'>
+        <div className='flex justify-center items-center mt-8'>
+          <div className='lg:w-[900px] w-11/12 p-6 bg-white rounded-[7px]'>
+            <div className=" flex bg-[#00817FFF] p-4">
+              <div className='w-4/5 '>
+                <h4 className="text-center font-bold text-lg text-white">NurseChart</h4>
+              </div>
+              <div className='w-1/5  flex justify-end'>
+                <Link class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" to="/loggedout">
+                  Logout
+                </Link>
+              </div>
+            </div>
+            <div className='flex lg:flex-row flex-col gap-1 grid-cols-2 mt-1'>
+              {/* Left Section */}
+              <div className='lg:w-1/4 '>
+                <p>Recent Templates</p>
+                <ul className='flex lg:flex-col flex-wrap lg:gap-0 gap-2'>
+                  {templatesToDisplay.length === 0 ? (
+                    <p className='text-red-600 text-sm'>No template added</p> // Show this message if there are no templates
+                  ) : (
+                    templatesToDisplay.map((template, index) => (
+                      <a
+                        onClick={() => onTemplateHandle(template)}
+                        key={index}
+                        className='text-blue-600 hover:cursor-pointer hover:underline'
+                      >
+                        {template}
+                      </a>
+                    ))
+                  )}
 
-                                    {/* Conditionally render "See More..." if more than 10 templates exist */}
-                                    {templatesToDisplay.length >= 10 && (
-                                        <Link className='text-blue-600 hover:cursor-pointer hover:underline' to="all-templates" state={{ templatesWithIds: templatesWithIds }}>
-                                            See More...
-                                        </Link>
-                                    )}
-                                </ul>
+                  {/* Conditionally render "See More..." if more than 10 templates exist */}
+                  {templatesToDisplay.length >= 10 && (
+                    <Link className='text-blue-600 hover:cursor-pointer hover:underline' to="all-templates" state={{ templatesWithIds: templatesWithIds }}>
+                      See More...
+                    </Link>
+                  )}
+                </ul>
 
-                                {/* <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
+                {/* <button className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white w-full mt-2">
                       Add New Patient
                     </button> */}
-                            </div>
-                            {/* Right Section */}
-                            <div className='flex flex-col gap-2 lg:w-3/4 '>
-                                <p>Quick Templates</p>
-                                <div className='flex gap-2 lg:text-base text-sm'>
-                                    <select className='border focus:outline-none' value={selectedTemplate}
-                                        onChange={handleSelectChange}>
-                                        <option value="">Select a Template</option>
-                                        <option value="Vital Signs">Vital Signs</option>
-                                        <option value="Head-to-Toe Assessment">Head-to-Toe Assessment</option>
-                                        <option value="Medication Administration">Medication Administration</option>
-                                        <option value="Specialized Care">Specialized Care</option>
-                                        <option value="Patient Education">Patient Education</option>
-                                        <option value="Plan for Next Visit">Plain for Next Visit</option>
-                                    </select>
-                                    <button onClick={handleGenerateReport} className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
-                        Generate Report
-                      </button>
-                                </div>
-                                <p>Voice Recording</p>
-                                <div className='flex gap-2 '>
-                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={handleRecording}>
-                                        {isRecording ? 'Recording...' : 'Start Recording'}
-                                    </button>
-                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={handleStopRecording}>
-                                        Stop Recording
-                                    </button>
-                                    <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={hanldeNewTemplateEntry}>
-                                        Clear for New Template
-                                    </button>
-                                </div>
-                                <textarea ref={textAreaRef} className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder='Transcription will appear here.' id="transcription" name="transcription" value={transcription} readOnly rows="6" cols="50">
-                                </textarea>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+              {/* Right Section */}
+              <div className='flex flex-col gap-2 lg:w-3/4 '>
+                <p>Quick Templates</p>
+                <div className='flex gap-2 lg:text-base text-sm'>
+                  <select className='border focus:outline-none' value={selectedTemplate}
+                    onChange={handleSelectChange}>
+                    <option value="">Select a Template</option>
+                    <option value="Vital Signs">Vital Signs</option>
+                    <option value="Head-to-Toe Assessment">Head-to-Toe Assessment</option>
+                    <option value="Medication Administration">Medication Administration</option>
+                    <option value="Specialized Care">Specialized Care</option>
+                    <option value="Patient Education">Patient Education</option>
+                    <option value="Plan for Next Visit">Plain for Next Visit</option>
+                  </select>
+                  <button onClick={handleGenerateReport} className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
+                    Generate Report
+                  </button>
+                  {showModal && (
+                    <Modal
+                      title="Verify the Extracted Information"
+                      transcription={extractedInformation}
+                      onClose={(updatedTranscription) => {
+                        setextractedInformation(updatedTranscription); // Update state
+                        setShowModal(false); // Close the modal
+                        if (modalResolveRef.current) {
+                          modalResolveRef.current(updatedTranscription); // Resolve the promise with the updated transcription
+                        }
+                      }}
+                    />
+                  )}
+
                 </div>
-                <div className='flex gap-2 justify-center mt-3'>
-                    <button class="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
-                        Previous
-                    </button>
-                    <button className="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
-                        Next
-                    </button>
+                <p>Voice Recording</p>
+                <div className='flex gap-2 '>
+                  <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={handleRecording}>
+                    {isRecording ? 'Recording...' : 'Start Recording'}
+                  </button>
+                  <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={handleStopRecording}>
+                    Stop Recording
+                  </button>
+                  <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={hanldeNewTemplateEntry}>
+                    Clear for New Template
+                  </button>
                 </div>
+                <textarea ref={textAreaRef} className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-[#DEDEDEFF] focus:border-transparent' placeholder='Transcription will appear here.' id="transcription" name="transcription" value={transcription} readOnly rows="6" cols="50">
+                </textarea>
+              </div>
             </div>
+          </div>
         </div>
-    );
+        <div className='flex gap-2 justify-center mt-3'>
+          <button class="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
+            Previous
+          </button>
+          <button className="bg-[#00817FFF] cursor-pointer py-2 px-4 text-white rounded">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Home;
