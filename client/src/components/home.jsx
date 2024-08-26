@@ -536,7 +536,7 @@ const Home = () => {
                     <option value="Patient Education">Patient Education</option>
                     <option value="Plan for Next Visit">Plain for Next Visit</option>
                   </select>
-                  <button onClick={handleGenerateReport} className="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white">
+                  <button onClick={handleGenerateReport} className="bg-[#00817FFF] rounded-sm cursor-pointer p-1 text-white">
                     Generate Report
                   </button>
                   {showModal && (
@@ -556,13 +556,13 @@ const Home = () => {
                 </div>
                 <p>Voice Recording</p>
                 <div className='flex gap-2 '>
-                  <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={handleRecording}>
+                  <button class="bg-[#00817FFF] rounded-sm cursor-pointer p-1 text-white" onClick={handleRecording}>
                     {isRecording ? 'Recording...' : 'Start Recording'}
                   </button>
-                  <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={handleStopRecording}>
+                  <button class="bg-[#00817FFF] rounded-sm cursor-pointer p-1 text-white" onClick={handleStopRecording}>
                     Stop Recording
                   </button>
-                  <button class="bg-[#910086FF] rounded-sm cursor-pointer p-1 text-white" onClick={hanldeNewTemplateEntry}>
+                  <button class="bg-[#00817FFF] rounded-sm cursor-pointer p-1 text-white" onClick={hanldeNewTemplateEntry}>
                     Clear for New Template
                   </button>
                 </div>
