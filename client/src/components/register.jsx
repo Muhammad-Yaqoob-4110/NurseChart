@@ -189,7 +189,7 @@ class Register extends Component {
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-2">
                                         <svg className="h-5 w-5 fill-slate-300" viewBox="0 0 20 20"></svg>
                                     </span>
-                                    <input className="placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Full Name" type="text" name="fullname" value={this.state.newUser.fullname} onChange={this.handleChange} />
+                                    <input className="placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-4 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Full Name" type="text" name="fullname" value={this.state.newUser.fullname} onChange={this.handleChange} />
                                 </label>
                                     {this.state.errors.fullname && (
                                         <div className="text-sm text-red-600 mt-1 ml-1">{this.state.errors.fullname}</div>
@@ -199,7 +199,7 @@ class Register extends Component {
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-2">
                                         <svg className="h-5 w-5 fill-slate-300" viewBox="0 0 20 20"></svg>
                                     </span>
-                                    <input className=" placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Email" type="text" name="email" value={this.state.newUser.email} onChange={this.handleChange} />
+                                    <input className=" placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-4 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Email" type="text" name="email" value={this.state.newUser.email} onChange={this.handleChange} />
                                 </label>
                                     {this.state.errors.email && (
                                         <div className="text-sm text-red-600">{this.state.errors.email}</div>
@@ -209,7 +209,7 @@ class Register extends Component {
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-2">
                                         <svg className="h-5 w-5 fill-slate-300" viewBox="0 0 20 20"></svg>
                                     </span>
-                                    <input className=" placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Username" type="text" name="username" value={this.state.newUser.username} onChange={this.handleChange} />
+                                    <input className=" placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-4 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Username" type="text" name="username" value={this.state.newUser.username} onChange={this.handleChange} />
                                 </label>
                                 {this.state.errors.username && (
                                         <div className="text-sm text-red-600">{this.state.errors.username}</div>
@@ -219,7 +219,7 @@ class Register extends Component {
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-2">
                                         <svg className="h-5 w-5 fill-slate-300" viewBox="0 0 20 20"></svg>
                                     </span>
-                                    <input className=" placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Passowrd" type="text" name="password" value={this.state.newUser.password} onChange={this.handleChange}/>
+                                    <input className=" placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-4 pr-3 shadow-sm focus:outline-none focus:border-[#00817FFF] focus:ring-[#00817FFF] focus:ring-1 sm:text-sm" placeholder="Passowrd" type="password" name="password" value={this.state.newUser.password} onChange={this.handleChange}/>
                                 </label>
                                 {this.state.errors.password && (
                                         <div className="text-sm text-red-600">{this.state.errors.password}</div>
