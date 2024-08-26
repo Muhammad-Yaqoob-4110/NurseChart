@@ -16,7 +16,7 @@ const Modal = ({ title, transcription, onClose }) => {
                     <form className='flex flex-col' onSubmit={handleSubmit}>
                         <textarea className='border resize-none p-1 border-[#DEDEDEFF] focus:outline-white focus:border-transparent w-full px-4 py-3 text-black rounded-md' placeholder='Transcription will appear here.' id="transcription" name="transcription" value={editedTranscription} rows="10" cols="50" onChange={(e) => setEditedTranscription(e.target.value)} >
                         </textarea>
-                        <button className='mt-4 flex items-center justify-center gap-2 px-5 py-3 font-medium rounded-md bg-red-600' type="submit"><Check /> Confirm Details</button>
+                        <button className='mt-4 flex items-center justify-center gap-2 px-5 py-3 font-medium rounded-md bg-white text-[#00817FFF]' type="submit"><Check /> Confirm Details</button>
 
                     </form>
                 </div>
